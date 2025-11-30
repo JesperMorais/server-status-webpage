@@ -1,4 +1,4 @@
-# Minecraft Server Status
+# Server Status
 
 A simple, clean website that displays the real-time status of a Minecraft server.
 
@@ -8,7 +8,6 @@ A simple, clean website that displays the real-time status of a Minecraft server
 - Server icon display
 - Message of the Day (MOTD)
 - Player count and max players
-- Minecraft version
 - List of online players with avatars
 - Auto-refresh every 30 seconds
 - Manual refresh button

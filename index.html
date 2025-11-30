@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Server Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card {
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.1rem;
+            color: #4ade80;
+            text-shadow: 2px 2px 0 #166534;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .server-ip {
+            font-size: 0.85rem;
+            color: #888;
+            font-family: monospace;
+        }
+
+        .server-icon-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .server-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            background: #2a2a3e;
+            border: 2px solid #3a3a4e;
+        }
+
+        .status-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-indicator.online {
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
+            }
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .status-text.online {
+            color: #22c55e;
+        }
+
+        .status-text.offline {
+            color: #ef4444;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .motd-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .motd-label {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .motd-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .players-section {
+            margin-bottom: 20px;
+        }
+
+        .players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .players-title {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .players-count {
+            font-weight: 500;
+            color: #4ade80;
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .player-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .player-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .no-players {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 15px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .last-updated {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 6px;
+            color: #4ade80;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(74, 222, 128, 0.2);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .refresh-icon {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.5s;
+        }
+
+        .refresh-btn.loading .refresh-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(74, 222, 128, 0.2);
+            border-top-color: #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .loading-text {
+            color: #888;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .error-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            color: #ef4444;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 0.9rem;
+            }
+
+            .footer {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1 class="title">MINECRAFT SERVER</h1>
+                <p class="server-ip">gnugg.servebeer.com:25565</p>
+            </div>
+
+            <div id="content">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Checking server status...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVER_ADDRESS = 'gnugg.servebeer.com:25565';
+        const API_URL = `https://api.mcsrvstat.us/3/${SERVER_ADDRESS}`;
+        const ICON_URL = `https://api.mcsrvstat.us/icon/${SERVER_ADDRESS}`;
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+
+        let refreshTimer = null;
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function parseMotd(motd) {
+            if (!motd) return '';
+
+            // Handle both raw and clean MOTD formats
+            if (motd.clean && Array.isArray(motd.clean)) {
+                return motd.clean.join('<br>');
+            }
+            if (motd.raw && Array.isArray(motd.raw)) {
+                // Strip Minecraft color codes
+                return motd.raw.map(line =>
+                    escapeHtml(line.replace(/\u00A7[0-9a-fk-or]/gi, ''))
+                ).join('<br>');
+            }
+            return escapeHtml(String(motd));
+        }
+
+        function renderServerStatus(data) {
+            const content = document.getElementById('content');
+            const isOnline = data.online === true;
+
+            if (!isOnline) {
+                content.innerHTML = `
+                    <div class="server-icon-container">
+                        <img src="${ICON_URL}" alt="Server Icon" class="server-icon"
+                             onerror="this.style.display='none'">
+                    </div>
+                    <div class="status-section">
+                        <div class="status-indicator"></div>
+                        <span class="status-text offline">Offline</span>
+                    </div>
+                    <div class="error-state">
+                        <div class="error-icon">&#x1F6AB;</div>
+                        <p class="error-message">Server is currently offline or unreachable</p>
+                    </div>
+                    ${renderFooter()}
+                `;
+                return;
+            }
+
+            const players = data.players || {};
+            const playerList = players.list || [];
+            const motdHtml = parseMotd(data.motd);
+            const version = data.version || 'Unknown';
+
+            content.innerHTML = `
+                <div class="server-icon-container">
+                    <img src="${ICON_URL}" alt="Server Icon" class="server-icon"
+                         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect fill=%22%232a2a3e%22 width=%2264%22 height=%2264%22/></svg>'">
+                </div>
+
+                <div class="status-section">
+                    <div class="status-indicator online"></div>
+                    <span class="status-text online">Online</span>
+                </div>
+
+                ${motdHtml ? `
+                    <div class="motd-section">
+                        <p class="motd-label">Message of the Day</p>
+                        <p class="motd-text">${motdHtml}</p>
+                    </div>
+                ` : ''}
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Players</span>
+                        <span class="info-value">${players.online || 0}/${players.max || 0}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Version</span>
+                        <span class="info-value">${escapeHtml(version)}</span>
+                    </div>
+                </div>
+
+                <div class="players-section">
+                    <div class="players-header">
+                        <span class="players-title">Online Players</span>
+                        <span class="players-count">${players.online || 0}</span>
+                    </div>
+                    ${playerList.length > 0 ? `
+                        <div class="players-list">
+                            ${playerList.map(player => {
+                                const name = player.name || player;
+                                const uuid = player.uuid || '';
+                                const avatarUrl = uuid
+                                    ? `https://crafatar.com/avatars/${uuid}?size=20&overlay`
+                                    : `https://mc-heads.net/avatar/${encodeURIComponent(name)}/20`;
+                                return `
+                                    <div class="player-tag">
+                                        <img src="${avatarUrl}" alt="${escapeHtml(name)}" class="player-avatar"
+                                             onerror="this.style.display='none'">
+                                        <span>${escapeHtml(name)}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <p class="no-players">No players currently online</p>
+                    `}
+                </div>
+
+                ${renderFooter()}
+            `;
+        }
+
+        function renderFooter() {
+            return `
+                <div class="footer">
+                    <span class="last-updated">Last updated: ${formatTime(new Date())}</span>
+                    <button class="refresh-btn" onclick="refreshStatus()">
+                        <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">&#x26A0;</div>
+                    <p class="error-message">${escapeHtml(message)}</p>
+                    <button class="refresh-btn" onclick="refreshStatus()">
+                        <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderLoading() {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Checking server status...</p>
+                </div>
+            `;
+        }
+
+        async function fetchServerStatus() {
+            try {
+                const response = await fetch(API_URL);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching server status:', error);
+                throw error;
+            }
+        }
+
+        async function refreshStatus() {
+            const btn = document.querySelector('.refresh-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.classList.add('loading');
+            }
+
+            try {
+                const data = await fetchServerStatus();
+                renderServerStatus(data);
+            } catch (error) {
+                renderError('Unable to fetch server status. Please try again later.');
+            }
+
+            // Re-enable button after render
+            const newBtn = document.querySelector('.refresh-btn');
+            if (newBtn) {
+                newBtn.disabled = false;
+                newBtn.classList.remove('loading');
+            }
+        }
+
+        function startAutoRefresh() {
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+            refreshTimer = setInterval(refreshStatus, REFRESH_INTERVAL);
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshStatus();
+            startAutoRefresh();
+        });
+
+        // Handle visibility change to refresh when tab becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                refreshStatus();
+            }
+        });
+    </script>
+</body>
+</html>
